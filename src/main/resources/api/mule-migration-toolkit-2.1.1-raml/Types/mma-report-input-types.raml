@@ -1,0 +1,82 @@
+#%RAML 1.0 DataType
+type: object
+additionalProperties: false
+properties:
+  projectType: 
+    type: string
+    enum: ["MULE_THREE_MAVEN_APPLICATION"]
+  projectName: 
+    type: string
+  connectorsMigrated:
+    type: array
+    items: 
+      type: string
+  numberOfMuleComponents:
+    type: number
+    format: int
+  numberOfMuleComponentsMigrated:
+    type: number
+    format: int
+  componentDetails:
+    type: object
+    properties:
+      //: 
+        type: object
+        properties:
+          success:
+            type: number
+            format: int
+          failure:
+            type: number
+            format: int
+  numberOfMELExpressions:
+    type: number
+    format: int
+  numberOfMELExpressionsMigrated:
+    type: number
+    format: int
+  numberOfMELExpressionLines:
+    type: number
+    format: int
+  numberOfMELExpressionLinesMigrated:
+    type: number
+    format: int
+  numberOfDWTransformations:
+    type: number
+    format: int
+  numberOfDWTransformationsMigrated: 
+    type: number
+    format: int
+  numberOfDWTransformationLines:
+    type: number
+    format: int
+  numberOfDWTransformationLinesMigrated:
+    type: number
+    format: int
+  detailedMessages:
+    type: array
+    items: 
+      type: object
+      properties:
+        level:
+          type: string
+          enum: ["INFO", "WARN", "ERROR"]
+        key:
+          type: string
+          required: false
+        component:
+          type: string
+        lineNumber:
+          type: number
+          format: int
+        columnNumber:
+          type: number
+          format: int
+        message:
+          type: string
+        filePath:
+          type: string
+        documentationLinks:
+          type: array
+          items: 
+            type: string

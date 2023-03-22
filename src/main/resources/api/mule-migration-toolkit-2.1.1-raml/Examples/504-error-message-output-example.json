@@ -1,0 +1,7 @@
+{
+  "timestamp": "2022-04-14T14:00:00",
+  "api": "Migration",
+  "code": "504",
+  "message": "GATEWAY TIMEOUT",
+  "details": "This error response is given when the server is acting as a gateway and cannot get a response in time."
+}

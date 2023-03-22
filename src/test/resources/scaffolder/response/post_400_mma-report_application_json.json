@@ -1,0 +1,7 @@
+{
+  "timestamp": "2022-05-11T12:16:55.74+01:00",
+  "api": "mule-324-migration-toolkit",
+  "code": "400",
+  "message": "BAD_REQUEST",
+  "details": "expected type: JSONArray, found: JSONObject"
+}

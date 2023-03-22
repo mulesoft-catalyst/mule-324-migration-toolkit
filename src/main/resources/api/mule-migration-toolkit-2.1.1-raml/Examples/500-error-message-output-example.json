@@ -1,0 +1,7 @@
+{
+  "timestamp": "2022-04-02T02:00:00",
+  "api": "Migration",
+  "code": "500",
+  "message": "INTERNAL SERVER ERROR",
+  "details": "The server has encountered a situation it does not know how to handle."
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="ui-flow" doc:id="fe1ba654-a2db-4466-9c30-92500646bb3a" >
+		<http:listener doc:name="Listener" doc:id="c32d0468-433f-44b6-a918-ed5ec3d8c0bf" config-ref="migration-httpListenerConfig" path="/"/>
+		<http:load-static-resource doc:name="Load static resource" doc:id="95dc450c-c307-4ad1-b772-4fdb3fb4eb20" resourceBasePath="${app.home}/ui"/>
+	</flow>
+	<flow name="ui-estimate-flow" doc:id="9b484164-1d02-4c4a-ac62-6832f5df8251" >
+		<http:listener doc:name="Listener" doc:id="a45f0bb3-51b1-449c-b00e-b497fd7cb97e" config-ref="migration-httpListenerConfig" path="/estimate.html"/>
+		<http:load-static-resource doc:name="Load static resource" doc:id="ba68fada-417a-4f68-8ff7-55134d3e6ecc" resourceBasePath="${app.home}/ui" defaultFile="estimate.html"/>
+	</flow>
+	<flow name="bash-script-flow" doc:id="b0dbb69e-bf2a-43ea-849e-7e1301dd957c">
+		<http:listener doc:name="Listener" doc:id="f6db01dd-87bd-4234-859f-d00ccf59e9d2" config-ref="migration-httpListenerConfig" path="/ui/runMMA.sh"/>
+		<http:load-static-resource doc:name="Load static resource" doc:id="eae15fed-f9f2-4615-a0c6-fe38ffeec3fc" resourceBasePath="${app.home}/ui" defaultFile="runMMA.sh"/>	
+	</flow>
+	<flow name="windows-script-flow" doc:id="7baed1f4-4d3c-484b-94f2-e4daac2c13dc">
+		<http:listener doc:name="Listener" doc:id="7e6e1863-4ddb-4d23-becd-0b0c1f04429d" config-ref="migration-httpListenerConfig" path="/ui/runMMA.bat"/>
+		<http:load-static-resource doc:name="Load static resource" doc:id="b7e7196b-32f0-4419-9cf5-ec040c272c34" resourceBasePath="${app.home}/ui" defaultFile="runMMA.bat"/>	
+	</flow>
+</mule>

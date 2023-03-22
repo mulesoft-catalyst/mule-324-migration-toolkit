@@ -1,0 +1,569 @@
+excel:
+  tmpDir: "/tmp/"
+  general:
+    instructions: '[{"Name": "", "Description": ""},{"Name": "", "Description": ""},{"Name": "Application Name", "Description": "The name of the Mule 3 Application/ Project"},{"Name": "Original Complexity", "Description": "The original complexity of the Mule 3 Application based on the number of Mule Components present in the project"},{"Name": "Percentage Automation", "Description": "The percentage of the application that was automatically migrated by the MMA"},{"Name": "Score", "Description": "A numerical score assigned for the amount of manual effort required to complete the migration of this application. This score is based on a predefined set of scores assigned for each mule connectors, transformers, routers, scopes, configurations, MEL/ DW expressions etc including any unsupported components all of which MMA was unable to migrate successfully. A default score is used for custom components which are listed in the Summary (Auto Generated) field"},{"Name": "Migration Effort (T Shirt Sizing)", "Description": "The build and test effort magnitude expressed as a t shirt size required in order to complete the migration. The build effort is derived from the score while the test effort is derived based on the overall complexity of the Mule app. The test effort do not include writing new unit test cases and assumes that existing unit testing mechanism would be used on the migrated API."},{"Name": "Migration Effort (Days)", "Description": "The build and test effort in person days required in order to complete the migration. The build effort is derived from the score while the test effort is derived based on the overall complexity of the Mule app. The test effort do not include writing new unit test cases and assumes that existing unit testing mechanism would be used on the migrated API. This effort is based on a 2-3 years experienced or certified MuleSoft Developer who is proficient on Mule 4 development and has a good understanding of Mule 3. Based on the experience of the team member, the person days can be modified by multiplying a skill factor of the team to the base person days effort"},{"Name": "Summary (Auto Generated)", "Description": "An auto generated summary of the result of the MMA migration including the number of Mule 3 components, list of both standard / OOTB and custom mule componnents used within the Mule application along with the number of their occurrences which the MMA failed to migrate. This provides additional details on the score and effort required for each Mule application"}, {"Name": "", "Description": ""}, {"Name": "", "Description": ""}, {"Name": "Application - Count", "Description": "=COUNT(Estimate!C:C)"}, {"Name": "Percentage Automation - Average", "Description": "=AVERAGE(Estimate!C:C)"}, {"Name": "Migration Effort (Days - Developer) - Total", "Description": "=SUM(Estimate!F:F)"}, {"Name": "Migration Effort (Days - STC/ TA)", "Description": "<x>"}, {"Name": "Migration Effort (Days - DM)", "Description": "<y>"}, {"Name": "Migration Effort (Days) - Total", "Description": "=B15+B16+B17"}]'
+  estimate:
+    summary:
+      component: "The Mule 3 application contains <x> components out of which <y> were successfully migrated by MMA."
+      expression: "Also, the MMA was able to convert <x> MEL expressions and <y> DW 1.0 expressions into DW 2.0."
+      standard: "The score is derived from an estimated manual effort required to migrate any remaining MEL/ DW expressions and the following Standard/ OOTB Mule components (and their number of occurrences in the application) which the MMA either failed to migrate or migrated them with warnings: <x>."
+      custom: "A default score was applied to calculate the manual effort for <x> custom components (and their number of occurrences in the application) as the migration of these is not supported by MMA: <y>."  
+complexity:
+  weightage:
+    array: '[{"name": "Not Estimated", "contingencyFactor": "0.00","unitTestEffort": "0.00", "componentMin": "0", "componentMax": "0"}, {"name": "Very Low", "contingencyFactor": "1.05","unitTestEffort": "0.20", "componentMin": "1", "componentMax": "50"},{"name": "Low", "contingencyFactor": "1.05","unitTestEffort": "0.25", "componentMin": "51", "componentMax": "150"},{"name": "Medium", "contingencyFactor": "1.10","unitTestEffort": "0.30", "componentMin": "151", "componentMax": "350"},{"name": "High", "contingencyFactor": "1.15","unitTestEffort": "0.35", "componentMin": "351", "componentMax": "1500"},{"name": "Very High", "contingencyFactor": "1.20","unitTestEffort": "0.35", "componentMin": "1501", "componentMax": "9999999999999999"}]'
+
+effort:
+  score:
+    array: '[{"tShirtSize": "-", "scoreMin": "0", "scoreMax": "0"}, {"tShirtSize": "XS", "scoreMin": "1", "scoreMax": "499"}, {"tShirtSize": "S", "scoreMin": "500", "scoreMax": "1999"}, {"tShirtSize": "M", "scoreMin": "2000", "scoreMax": "3999"}, {"tShirtSize": "L", "scoreMin": "4000", "scoreMax": "7499"}, {"tShirtSize": "XL", "scoreMin": "7500", "scoreMax": "9999999999999"}]'
+  
+score:
+  weightage:
+    dm-effort-factor: "0.50"
+    build-default: "1"
+    MEL: "10"
+    DW: "3"    
+    level:
+      INFO: "0.50"
+      WARN: "1.00"
+      ERROR: "2.00"
+    key:
+      default: "1.00"
+      components:
+        unsupported: "1.00"
+        java: "1.00"
+        unknown: "1.00"
+        interceptors: "1.00"
+      compression:
+        ignoreBadInput: "0.50"        
+      errorHandling:
+        reuse: "1.00"
+        redelivery: "1.00"
+      expressionTransformer:
+        deprecated: "1.00"
+      expressions:
+        melToDw: "0.50"
+        emptyLiteral: "0.50"
+        methodInvocation: "1.00"
+        datamapper: "1.00"
+      configProperties:
+        securePrefix: "1.00"
+        springAttributes: "1.00"
+        ignoreResourceNotFound: "1.00"
+        ignoreUnresolvablePlaceholders: "1.00"
+      message:
+        attributesToInboundProperties: "0.10"
+        outboundProperties: "0.10"
+        outboundPropertyEnricher: "0.25"
+        sessionVars: "1.00"
+        expressionsAttachments: "0.50"
+        copyProperties: "0.10"
+        inboundAttachments: "0.25"
+        outboundAttachments: "0.25"
+      mulexml:
+        xmlToDom: "0.25"
+      transform:
+        studioCustomTypes: "0.10"
+        outboundProperties: "0.10"
+        sessionVars: "1.00"
+      dataWeave:
+        migrationErrorScript: "1.00"   
+      scripting:
+        messageFormat: "0.50"
+      email:
+        outbound: "0.10"
+        pop3DefaultProcessMessageAction: "1.00"
+        transformers: "1.00"
+      aggregator:
+        noSplitter: "1.00"
+        missing: "0.10"
+        custom: "1.00"
+        customSplitter: "1.00"
+      splitter:
+        custom: "1.00"
+      filters:
+        replacedWithValidations: "0.25"
+        validationsRaiseError: "0.50"
+      flow:
+        threading: "0.25"
+        processingStrategy: "0.10"
+        dynamicFlowRefName: "1.00"
+      async:
+        processingStrategy: "0.10"
+      enricher:
+        multipleEnrichments: "1.00"
+      scatterGather:
+        threading: "0.10"    
+        customAggregation: "1.00"
+      validation:
+        customValidators: "1.00"    
+      transports:
+        cantParseAddress: "0.50"
+        requestReplySplit: "1.00"
+        domainConnector: "1.00"
+        requestReplyStorePrefix: "1.00"
+      proxy:
+        templates: "0.10"
+        descriptionTagMigrationStep: "0.25"
+      configuration:
+        processingStrategy: "0.10"
+      apiDiscovery:
+        apiId: "1.00"
+      raml:
+        autocompletedConfigAttribute: "1.00"
+        autocompletedOnErrorContinueElement: "1.00"
+        noMatchingConfig: "1.00"
+      http:
+        "host": "0.25"
+        "port": "0.25"
+        mapExpression: "0.50"
+        statusCode: "0.25"
+        checkPayload: "0.10"
+        socketProperties: "0.25"
+        parseResponse: "0.10"
+        restConnect: "1.00"
+        method: "1.00"
+        sendBodyMode: "1.00"
+      jms:
+        propertiesListener: "1.00" 
+        beanConnectionFactory: "1.00"
+        propertiesPublish: "0.25"
+        weblogicMqConnector: "0.50"
+        listenerTx: "0.50"
+        customConnector: "1.00"
+        nestedTx: "1.00"
+      vm:
+        sessionVars: "1.00"
+        requestReplyInbound: "0.10"
+        listenerTx: "0.50"
+      amqp:
+        exchangeDefinition: "1.00"
+      file:
+        responseTimeout: "0.10"
+        caseSensitive: "1.00"
+        streaming: "0.10"
+        notNeeded: "0.10"
+        workDirectory: "0.50"
+      sftp:
+        tempDir: "1.00"
+        addSeqNo: "1.00"
+      db:
+        jdbcUrlForSpecificEngine: "1.00" 
+        streaming: "0.10"
+        source: "1.00"
+        referencedDataSource: "1.00"
+        jdbcDriverDependency: "0.50"
+        configAttributesOverlap: "1.00"
+      os:
+        store: "0.50" 
+        config: "0.10"
+        disposeStore: "1.00"
+      quartz:
+        connector: "0.10"
+        unsupportedSource: "1.00"    
+        repeatCount: "1.00"    
+      wsc:
+        unsupportedProtocol: "1.00"    
+        wsdl: "0.10"
+      salesforce:
+        fetchSize: "1.00"
+        outputMatch: "1.00"
+    component:
+      "default": "15"
+      "foreach": "10"
+      "when": "5"
+      "set-payload": "2"
+      "flow-ref": "10"
+      "logger": "2"
+      "expression-component": "30"
+      "expression-language": "30"
+      "mule": "5"
+      "sub-flow": "5"
+      "flow": "5"
+      "on-error-continue": "10"
+      "on-error-propagate": "15"
+      "otherwise": "5"
+      "set-variable": "5"
+      "remove-variable": "5"
+      "collection-aggregator": "30"
+      "custom-aggregator": "60"
+      "async": "5"
+      "until-successful": "5"
+      "invoke": "5"
+      "enricher": "15"
+      "enrich": "15"
+      "execute": "30"
+      "processor-chain": "30"
+      "error-handler": "30"
+      "try": "10"
+      "poll": "5"
+      "notifications": "10"
+      "notification": "10"
+      "notification-listener": "15"
+      "scheduler": "5"
+      "fixed-frequency-scheduler": "5"
+      "singleton-object": "10"      
+      "http":
+        "response": "2"
+        "error-response": "10"
+        "header": "5"
+        "headers": "5"
+        "uri-param": "5"
+        "query-param": "5"
+        "request": "5"
+        "request-builder": "5"
+        "request-config": "10"
+        "request-connection": "10"
+        "listener": "5"
+        "listener-config": "10"
+        "basic-authentication": "10"
+      "tls":
+        "context": "10"
+        "key-store": "5"
+        "trust-store": "5"
+      "byte-array-to-string-transformer": "5"
+      "byte-array-to-object-transformer": "5"
+      "message-properties-transformer": "5"
+      "object-to-byte-array-transformer": "5"
+      "string-to-byte-array-transformer": "5"
+      "base64-decoder-transformer": "5"
+      "scatter-gather": "10"
+      "choice": "5"      
+      "global-functions": "60"
+      "custom-interceptor": "60"
+      "custom-transformer": "60"
+      "custom-processor": "60"
+      "custom-object-store": "60"
+      "custom-connector": "180"
+      "custom-exception-strategy": "120"
+      "custom-splitter": "60"
+      "pooled-component": "60"
+      "reconnect-forever": "10"
+      "reconnect-custom-strategy": "30"
+      "idempotent-redelivery-policy": "10"
+      "component": "30"
+      "transformer": "10"
+      "exception-strategy": "15"
+      "parse-template": "5"
+      "configuration": "30"
+      "managed-store": "15"
+      "in-memory-store": "15"
+      "queued-asynchronous-processing-strategy": "10"
+      "route": "10"
+      "splitter": "5"
+      "configuration-properties": "5"
+      "compatibility":
+        "attributes-to-inbound-properties": "10"
+        "outbound-properties-to-var": "10"
+        "set-property": "5"
+        "copy-properties": "5"
+        "remove-property": "5"
+        "set-session-variable": "60"
+        "remove-session-variable": "60"
+        "multipart-to-vars": "30"
+      "ee":
+        "transform": "5"
+        "object-store-caching-strategy": "30"
+        "set-variable": "5"
+        "set-payload": "2"
+        "cache": "15"        
+        "invalidate-cache": "10"        
+      "dw":
+        "transform-message": "10"
+        "set-payload": "5"
+        "input-payload": "2"
+        "input-variable": "2"
+      "data-mapper":
+        "config": "30"
+        "input-argument": "15"
+        "input-arguments": "15"
+        "transform": "60"
+      "munit":
+        "before-test": "5" 
+        "execution": "5" 
+        "test": "15"
+        "behavior": "10"
+        "validation": "5"
+        "set": "5"
+        "assert-on-equals": "5"
+        "set-null-payload": "2"
+        "inbound-properties": "2"
+        "invocation-properties": "2"
+        "inbound-property": "2"
+        "invocation-property": "2"
+        "run-custom": "10"
+      "munit-tools":
+        "assert-that": "2"
+        "inbound-properties": "2"
+        "invocation-properties": "2"
+        "inbound-property": "2"
+        "invocation-property": "2"
+        "outbound-property": "2"
+        "outbound-properties": "2"
+      "assert-object-equals":
+        "compare-objects": "5"        
+        "compare-xml": "5"        
+      "mock":
+        "assertions-before-call": "10"
+        "assertions-after-call": "10"
+        "throw-an": "5"
+        "with-attributes": "10"
+        "with-attribute": "10"
+        "verify-call": "10"
+        "spy": "5"
+        
+      "test":
+        "component": "120"
+      "synchronize":
+        "run-and-wait": "5"            
+      "scripting":
+        "execute": "15"
+        "transformer": "30"
+        "script": "15"
+      "secure-properties":
+        "config": "30"
+      "secure-property-placeholder":
+        "config": "30"
+      "mulerequester":
+        "config": "10"
+        "request": "5"
+        "request-collection": "10"
+      "compression":
+        "compress": "30"        
+        "decompress": "30"
+      "mulexml":
+        "schema-validation-filter": "15"
+        "dom-to-xml-transformer": "10"
+        "xml-entity-encoder-transformer": "10"
+        "combine-collections-transformer": "30"
+        "xslt-transformer": "5"
+        "namespace-manager": "5"
+        "namespace": "5"        
+      "validation":
+        "is-true": "5"       
+        "is-false": "5"       
+        "is-not-null": "5"    
+        "is-null": "5"    
+        "is-not-empty-collection": "5"
+        "custom-validator": "60"   
+      "signature":
+        "sign": "15"
+        "verify-signature": "15"
+        "config": "30"
+      "encryption":
+        "decrypt": "15"
+        "encrypt": "15"
+        "pgp-encrypter-config": "30"
+        "config": "30"
+      "batch":
+        "step": "10"
+        "on-complete": "5"
+        "remove-record-variable": "5"
+      "bti":
+        "transaction-manager": "120"        
+      "db":
+        "in-param": "5"
+        "select": "2"
+        "insert": "5"
+        "update": "5"
+        "delete": "5"
+        "sql": "10"
+        "bulk-insert": "10"
+        "generic-connection": "15"
+        "data-source-connection": "30"
+        "oracle-connection": "5"
+        "my-sql-connection": "5"
+        "stored-procedure": "10"
+        "config": "10"
+        "pooling-profile": "30"
+      "jdbc-ee":
+        "outbound-endpoint": "15" 
+        "connector": "30"
+        "maps-to-xml-transformer": "60"
+      "jdbc":
+        "outbound-endpoint": "15" 
+        "connector": "30"
+      "cxf":
+        "jaxws-service": "60"     
+        "jaxws-client": "60"     
+        "configuration": "30"
+        "proxy-client": "60"
+        "proxy-service": "120"
+      "wsc":
+        "connection": "5"
+        "config": "10"
+      "jetty":
+        "inbound-endpoint": "15"
+      "spring":
+        "property": "10"               
+      "springjdbc":
+        "initialize-database": "30"
+      "spring-object": "15"        
+      "springutil":
+        "list": "60"
+      "util":
+        "list": "60"
+      "proxy":
+        "config": "10"
+      "rest-validator":
+        "config": "15"
+        "validate-request": "5"
+      "api-gateway":
+        "autodiscovery": "5"  
+      "api-platform-gw":
+        "description": "5"  
+      "os":
+        "store": "5"
+        "object-store": "15"
+        "retrieve": "5"
+        "clear": "10"
+      "vm":
+        "config": "10"
+        "content": "10"
+        "publish-consume": "5"
+        "listener": "5"
+        "outbound-endpoint": "10"
+      "cors":
+        "validate": "5"
+        "config": "10"
+      "jms":
+        "publish": "5"
+        "listener": "10"
+        "inbound-endpoint": "10"
+        "config": "15"
+      "file":
+        "listener": "5"
+        "matcher": "15"
+        "write": "5"
+        "config": "10"
+        "filename-wildcard-filter": "15"
+      "ftp":
+        "outbound-endpoint" : "10" 
+        "write" : "5" 
+        "connector": "10"
+        "inbound-endpoint": "10"
+        "endpoint": "10"
+      "sftp":
+        "write" : "5"
+        "config": "10"
+        "listener": "5" 
+        "matcher": "5"
+        "sftp-proxy-config": "10"
+      "email":
+        "send": "5"
+        "listener-pop3": "15"
+      "dotnet":
+        "externalConfig": "15"
+      "ldap":
+        "config": "15"
+        "search": "10"
+      "sfdc":
+        "config-oauth-user-pass": "30"
+        "query": "10"
+      "salesforce":
+        "query": "10"
+        "query-all": "15"
+        "create": "15"
+      "wd-connector":
+        "config": "15" 
+        "config-advanced": "30"
+        "invoke": "5"        
+      "mongo":
+        "insert-documents": "5"
+        "drop-collection": "5"
+        "find-files": "5"
+        "list-collections": "5"
+        "get-file-content": "5"
+        "find-documents": "5"
+        "find-one-document": "5"
+        "find-one-and-update-document": "10"
+        "count-documents": "5"
+        "create-index": "5"
+        "update-documents-by-function": "10"
+        "create-collection": "5"
+        "insert-document": "5"
+        "create-file-from-payload": "10"
+        "remove-documents": "5"
+        "update-documents": "5"
+        'update-documents-by-functions': "10"
+        "execute-command": "5"
+        "config": "10"
+        "config-connection-string": "15"
+      "successfactors":
+        "query": "5"
+        "config": "10"
+      "sap":
+        "outbound-endpoint": "5"
+        "connector": "10"
+      "cloudhub":
+        "create-notification": "5"
+        "config": "10"
+        "token-config": "10"
+        "custom-properties": "15"
+      "sqs":
+        "receive-messages": "10"
+        "send-message": "5"
+        "delete-message": "5"
+        "config": "10"
+        "get-queue-attributes": "5"
+      "s3":
+        "create-object": "10"
+        "copy-object": "10"
+        "delete-object": "10"
+        "get-object-content": "5"
+        "list-objects": "5"
+        "get-object": "5"
+        "config": "10"
+      "anypoint-mq":
+        "provider": "10"
+        "config": "15"
+        "publish": "5"
+        "subscriber": "5"
+        "message-builder": "10"
+        "worker-threading-profile": "15"
+        "ack": "5"
+        "consume": "5"
+      "microsoft-azure-service-bus":
+        "acknowledge-message": "5"
+        "queue-listener": "10"
+        "subscription-listener": "10"
+        "publish": "5"
+        "connection-string-config": "15"
+      "azure-storage":
+        "upload-blob-from-path": "10"
+        "download-blob": "10"
+        "accesskeyconfig": "15"
+        "sastoken": "5"
+      "netsuite":
+        "add-record": "10"
+        "search": "5"
+        "config-request-level-token-based-authentication": "15"
+        "get-record": "5"
+        "delete-record": "10"
+        "update-record": "10"
+        "upsert-record": "10"
+        "call-restlet-get": "5"
+      "connection-string-config": "15"
+      "oauth2":
+        "client-credentials-grant-type": "180"
+        "token-manager-config": "180"
+      "dbserver":
+        "stop-db-server": "5"
+        "start-db-server": "5"
+        "config": "10"
+      "redis":
+        "set": "10"
+        "config": "15"
+        "get": "5"
+        "del": "10"
+      "apachekafka":
+        "producer": "5"
+        "config": "10"
+      "sharepoint2010":
+        "NTLM": "15"
+        "file-add": "10"
+      "amqp":
+        "listener": "15"
+      "json-logger":
+        "logger": "5" 
+        "logger-json": "5" 
+        "json-logger-config": "10"        

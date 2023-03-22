@@ -1,0 +1,7 @@
+{
+  "timestamp": "2022-04-12T10:00:00",
+  "api": "Migration",
+  "code": "406",
+  "message": "NOT ACCEPTABLE",
+  "details": "This response is sent when the web server, after performing server-driven content negotiation, doesn't find any content that conforms to the criteria given by the user agent."
+}

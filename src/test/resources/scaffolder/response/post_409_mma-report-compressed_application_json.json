@@ -1,0 +1,7 @@
+{
+    "timestamp": "2022-06-02T16:00:10.719+02:00",
+	"api": "mule-324-migration-toolkit",
+    "code": "409",
+    "message": "TOO_RECENT",
+    "details": "This file was uploaded less than a week ago"
+}

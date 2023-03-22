@@ -1,0 +1,7 @@
+{
+  "timestamp": "2022-04-12T10:00:00",
+  "api": "Migration",
+  "code": "405",
+  "message": "METHOD NOT ALLOWED",
+  "details": "The request method is known by the server but is not supported by the target resource. For example, an API may not allow calling DELETE to remove a resource."
+}

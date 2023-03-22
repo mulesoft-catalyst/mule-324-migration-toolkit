@@ -1,0 +1,28 @@
+#%RAML 1.0 SecurityScheme
+type: Basic Authentication
+description: |
+  This API supports Basic authentication for authenticating
+  all API requests using a username and password.
+describedBy:
+  headers:
+    Authorization:
+      description: |
+        Used to send base64-encoded username and password.
+        Use the following format when encoding,
+        <username>:<password>.
+      type: string
+      example: Basic Y2xpZW50SWQ6c2VjcmV0S2V5
+  responses:
+    401:
+      description: |
+        Unauthorized.
+      body: 
+        application/json:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Authentication Attempt Failed"
+
+
+

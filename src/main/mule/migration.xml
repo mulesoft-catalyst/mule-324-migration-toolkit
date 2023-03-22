@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+    <flow name="migration-main" doc:id="d1b12802-0215-411f-ba03-93c8d65feb93">
+        <http:listener config-ref="migration-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="migration-config" />
+        <error-handler>
+            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="78f930f4-496b-4f45-81a1-b47f3c1dce7b" type="MIGRATION_TOOLKIT:NOT_FOUND">
+                <set-variable value="404" doc:name="httpStatus" doc:id="2894a876-2506-4a2b-8847-43c18ce4e661" variableName="httpStatus" />
+                <ee:transform doc:name="Transform Message" doc:id="6fad791a-1737-4730-9750-bcdc94624bcf">
+                    <ee:message>
+                        <ee:set-payload resource="dwl/error-response.dwl" />
+                    </ee:message>
+                    <ee:variables />
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4acc71e0-1e44-4d1b-8c6e-3aa39b709977" type="MIGRATION_TOOLKIT:TOO_RECENT">
+                <set-variable value="409" doc:name="httpStatus" doc:id="cb68647b-ee98-47c0-ae49-157e90d43970" variableName="httpStatus" />
+                <ee:transform doc:name="Transform Message" doc:id="79988dba-09c0-453e-a043-f030dccabdb1">
+                    <ee:message>
+                        <ee:set-payload resource="dwl/error-response.dwl" />
+                    </ee:message>
+                    <ee:variables />
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <set-variable value="400" doc:name="Set Variable" doc:id="59323b41-5c8e-456a-ba28-722e9933e2f6" variableName="httpStatus" />
+                <ee:transform doc:id="9ffe0f90-72c7-491e-afea-2b2c11c7a26c">
+                    <ee:message>
+                        <ee:set-payload resource="dwl/error-response.dwl" />
+                    </ee:message>
+                    <ee:variables />
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <set-variable value="404" doc:name="Set Variable" doc:id="0328c46a-3ff3-4f98-8f11-575c4a8cf098" variableName="httpStatus" />
+                <ee:transform doc:name="Transform Message" doc:id="c77036f9-1af5-4c0b-870b-ede53df260cd">
+                    <ee:message>
+                        <ee:set-payload resource="dwl/error-response.dwl" />
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <set-variable value="405" doc:name="Set Variable" doc:id="42468a5e-84b4-4aa7-aa99-4171cf530d89" variableName="httpStatus" />
+                <ee:transform doc:id="f31eff2a-2d81-49ac-a21e-e12092ebbfdf">
+                    <ee:message>
+                        <ee:set-payload resource="dwl/error-response.dwl" />
+                    </ee:message>
+                    <ee:variables />
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <set-variable value="406" doc:name="Set Variable" doc:id="6a331d1f-e744-46cb-8f71-8bf4c508214c" variableName="httpStatus" />
+                <ee:transform doc:id="d57b0634-215f-4188-936a-8963071e047b">
+                    <ee:message>
+                        <ee:set-payload resource="dwl/error-response.dwl" />
+                    </ee:message>
+                    <ee:variables />
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <set-variable value="415" doc:name="Set Variable" doc:id="9fc7785b-80aa-4b23-a72d-b7a0aeb864a1" variableName="httpStatus" />
+                <ee:transform doc:id="f8965049-a585-4504-b239-835cacd3afb7">
+                    <ee:message>
+                        <ee:set-payload resource="dwl/error-response.dwl" />
+                    </ee:message>
+                    <ee:variables />
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="MIGRATION_TOOLKIT:NOT_IMPLEMENTED" enableNotifications="true" logException="true">
+                <set-variable value="501" doc:name="Set Variable" doc:id="d83134e2-f7a6-4592-95ed-943a6dd8b912" variableName="httpStatus" />
+                <ee:transform doc:id="f16714c2-fd0b-40b2-883e-e806e2b9ceb8">
+                    <ee:message>
+                        <ee:set-payload resource="dwl/error-response.dwl" />
+                    </ee:message>
+                    <ee:variables />
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="HTTP:*">
+                <set-variable value="502" doc:name="Set Variable" doc:id="045191de-eba0-46cf-b1a0-af0bb6ac1fa1" variableName="httpStatus" />
+                <ee:transform doc:id="45e2b7d9-b013-48bf-a02f-f4222f5a937e">
+                    <ee:message>
+                        <ee:set-payload resource="dwl/error-response.dwl" />
+                    </ee:message>
+                    <ee:variables />
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="ANY">
+                <set-variable value="500" doc:name="Set Variable" doc:id="55682ac1-2029-4959-adad-89df3b52f212" variableName="httpStatus" />
+                <ee:transform doc:id="a30c08c6-7d82-49eb-a1a7-9c1651099392">
+                    <ee:message>
+                        <ee:set-payload resource="dwl/error-response.dwl" />
+                    </ee:message>
+                    <ee:variables />
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="post:\mma-report\calculate-effort:application\json:migration-config">
+        <flow-ref doc:name="Flow Reference" doc:id="2b178fc3-b263-4623-b9ee-6b543110364c" name="migration-post-mma-report-calculate-effort" />
+        <ee:transform doc:name="Transform Message" doc:id="8db5b97c-769b-4325-b970-b4c52e336c1c">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\mma-report\calculate-effort\compressed:multipart\form-data:migration-config">
+        <flow-ref doc:name="Flow Reference" doc:id="1d1318b5-cde6-43e8-b3ec-587aabb9a046" name="migration-post-mma-report-calculate-effort-compressed" />
+    </flow>
+    <flow name="post:\mma-report\generate-checklist:application\json:migration-config">
+        <raise-error doc:name="Raise error" doc:id="4b26fefd-a033-4840-b9f6-4e9d4b399f80" type="MIGRATION_TOOLKIT:NOT_IMPLEMENTED" description="This feature is going to come soon" />
+    </flow>
+    <flow name="post:\mma-report\upload-compressed:multipart\form-data:migration-config">
+        <flow-ref doc:name="Flow Reference" doc:id="c6a7c8fc-040d-4f0a-80bd-5a11ed11cda7" name="migration-post-mma-report-upload-compressed" />
+    </flow>
+    <flow name="get:\mma-report\retrieve-compressed\(uploadId):migration-config" doc:id="43260bab-6109-42f0-8b06-a1ce877352bf">
+        <flow-ref doc:name="Flow Reference" doc:id="ebf88752-210c-4206-81a3-5b1b1352eb81" name="migration-get-mma-report-retrieve-compressed-(uploadId)" />
+    </flow>
+    <flow name="get:\mma-report\retrieve-compressed:migration-config">
+        <flow-ref doc:name="Flow Reference" doc:id="14006f58-a7d0-4a20-95a2-c257cf43d7f5" name="migration-get-mma-report-retrieve-compressed-filename" />
+    </flow>
+</mule>

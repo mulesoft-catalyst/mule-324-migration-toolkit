@@ -1,0 +1,7 @@
+{
+  "timestamp": "2022-04-10T07:00:00",
+  "api": "Migration",
+  "code": "415",
+  "message": "UNSUPPORTED MEDIA TYPE",
+  "details": "The media format of the requested data is not supported by the server, so the server is rejecting the request."
+}

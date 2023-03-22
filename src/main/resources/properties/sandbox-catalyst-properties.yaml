@@ -1,0 +1,8 @@
+api.id: "18573409"
+key:
+  path: "key/mma-key-sandbox.jks"
+  alias:  "mma-key-sandbox"
+https:
+  port: "8082"
+  private:
+    port: "8092"

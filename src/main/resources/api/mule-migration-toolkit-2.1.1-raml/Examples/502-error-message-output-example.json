@@ -1,0 +1,7 @@
+{
+  "timestamp": "2022-04-22T22:00:00",
+  "api": "Migration",
+  "code": "502",
+  "message": "BAD GATEWAY",
+  "details": "This error response means that the server, while working as a gateway to get a response needed to handle the request, got an invalid response."
+}

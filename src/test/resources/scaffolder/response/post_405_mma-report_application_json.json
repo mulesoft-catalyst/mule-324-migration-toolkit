@@ -1,0 +1,7 @@
+{
+    "timestamp": "2022-05-10T16:01:05.487+01:00",
+	"api": "mule-324-migration-toolkit",
+    "code": "405",
+    "message": "METHOD_NOT_ALLOWED",
+    "details": "HTTP Method get not allowed for : /mma-report/calculate-effort"
+}

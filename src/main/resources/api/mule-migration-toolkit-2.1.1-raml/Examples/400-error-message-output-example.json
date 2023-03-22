@@ -1,0 +1,7 @@
+{
+  "timestamp": "2022-04-04T21:00:00",
+  "api": "Migration",
+  "code": "400",
+  "message": "BAD REQUEST",
+  "details": "The server cannot or will not process the request due to something that is perceived to be a client error"
+}

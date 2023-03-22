@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<style type="text/css">.form-style-1 {
+      	margin:10px auto;
+      	max-width: 400px;
+      	padding: 20px 12px 10px 20px;
+      	font: 13px "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+      }
+      .form-style-1 li {
+      	padding: 0;
+      	display: block;
+      	list-style: none;
+      	margin: 10px 0 0 0;
+      }
+
+      .form-style-1 label{
+      	margin:0 0 3px 0;
+      	padding:0px;
+      	display:block;
+      	font-weight: bold;
+      }
+      .form-style-1 input[type=text],
+      .form-style-1 input[type=date],
+      .form-style-1 input[type=datetime],
+      .form-style-1 input[type=number],
+      .form-style-1 input[type=search],
+      .form-style-1 input[type=time],
+      .form-style-1 input[type=url],
+      .form-style-1 input[type=email],
+      textarea,
+      select{
+      	box-sizing: border-box;
+      	-webkit-box-sizing: border-box;
+      	-moz-box-sizing: border-box;
+      	border:1px solid #BEBEBE;
+      	padding: 7px;
+      	margin:0px;
+      	-webkit-transition: all 0.30s ease-in-out;
+      	-moz-transition: all 0.30s ease-in-out;
+      	-ms-transition: all 0.30s ease-in-out;
+      	-o-transition: all 0.30s ease-in-out;
+      	outline: none;
+      }
+      .form-style-1 input[type=text]:focus,
+      .form-style-1 input[type=date]:focus,
+      .form-style-1 input[type=datetime]:focus,
+      .form-style-1 input[type=number]:focus,
+      .form-style-1 input[type=search]:focus,
+      .form-style-1 input[type=time]:focus,
+      .form-style-1 input[type=url]:focus,
+      .form-style-1 input[type=email]:focus,
+      .form-style-1 textarea:focus,
+      .form-style-1 select:focus{
+      	-moz-box-shadow: 0 0 8px #88D5E9;
+      	-webkit-box-shadow: 0 0 8px #88D5E9;
+      	box-shadow: 0 0 8px #88D5E9;
+      	border: 1px solid #88D5E9;
+      }
+      .form-style-1 .field-divided{
+      	width: 49%;
+      }
+
+      .form-style-1 .field-long{
+      	width: 100%;
+      }
+      .form-style-1 .field-select{
+      	width: 100%;
+      }
+      .form-style-1 .field-textarea{
+      	height: 100px;
+      }
+      .form-style-1 input[type=submit], .form-style-1 input[type=button]{
+      	background: #4B99AD;
+      	padding: 8px 15px 8px 15px;
+      	border: none;
+      	color: #fff;
+      }
+      .form-style-1 input[type=submit]:hover, .form-style-1 input[type=button]:hover{
+      	background: #4691A4;
+      	box-shadow:none;
+      	-moz-box-shadow:none;
+      	-webkit-box-shadow:none;
+      }
+      .form-style-1 .required{
+      	color:red;
+      }
+      .header {
+        background-color: white;
+        text-align: center;
+      }
+      .button{
+        display: inline-block;
+        *display: inline;
+        zoom: 1;
+        padding: 6px 20px;
+        margin: 0;
+        cursor: pointer;
+        border: 1px solid #bbb;
+        overflow: visible;
+        font: bold 13px arial, helvetica, sans-serif;
+        text-decoration: none;
+        white-space: nowrap;
+        color: #555;
+
+        background-color: #ddd;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,1)), to(rgba(255,255,255,0)));
+        background-image: -webkit-linear-gradient(top, rgba(255,255,255,1), rgba(255,255,255,0));
+        background-image: -moz-linear-gradient(top, rgba(255,255,255,1), rgba(255,255,255,0));
+        background-image: -ms-linear-gradient(top, rgba(255,255,255,1), rgba(255,255,255,0));
+        background-image: -o-linear-gradient(top, rgba(255,255,255,1), rgba(255,255,255,0));
+        background-image: linear-gradient(top, rgba(255,255,255,1), rgba(255,255,255,0));
+
+        -webkit-transition: background-color .2s ease-out;
+        -moz-transition: background-color .2s ease-out;
+        -ms-transition: background-color .2s ease-out;
+        -o-transition: background-color .2s ease-out;
+        transition: background-color .2s ease-out;
+        background-clip: padding-box; /* Fix bleeding */
+        -moz-border-radius: 3px;
+        -webkit-border-radius: 3px;
+        border-radius: 3px;
+        -moz-box-shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 2px 2px -1px rgba(0, 0, 0, .5), 0 1px 0 rgba(255, 255, 255, .3) inset;
+        -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 2px 2px -1px rgba(0, 0, 0, .5), 0 1px 0 rgba(255, 255, 255, .3) inset;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 2px 2px -1px rgba(0, 0, 0, .5), 0 1px 0 rgba(255, 255, 255, .3) inset;
+        text-shadow: 0 1px 0 rgba(255,255,255, .9);
+
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+	</style>
+	<title>Mule 3 Migration Estimator</title>
+</head>
+<body>
+<div class="content">
+<h1 style="text-align: center;"><span style="font-family:lucida sans unicode,lucida grande,sans-serif;">Mule 3 Migration Estimator</span></h1>
+
+<form action="/api/mma-report/calculate-effort/compressed" enctype="multipart/form-data" id="form" method="post">
+<p><span style="font-size:14px;"><span style="font-family:lucida sans unicode,lucida grande,sans-serif;">The Mule 3 Migration Estimator is a tool built to provide an indication on the rough order of magnitude (ROM) for performing the migration of Mule 3.x applications to Mule 4.x. The tool can&nbsp;<u><strong>ONLY</strong></u> provide&nbsp;an estimate&nbsp;when the <a href="https://github.com/mulesoft/mule-migration-assistant#mule-migration-assistant" target="_blank">Mule Migration Assistant (MMA)</a>&nbsp;is used to migrate these applications. The estimate is based on a JSON report provided by the MMA tool which includes a list of components which were automatically migrated, migrated with warnings or failed to be migrated. The findings of this JSON report determines the manual tasks&nbsp;required to resolve any migration issues and the ROM is based on the estimated effort required to address these tasks.</span></span></p>
+
+<table border="5" cellpadding="1" cellspacing="1" style="width:1650px;">
+	<tbody>
+		<tr>
+			<td>
+			<p><span style="font-size:13px;"><span style="font-family:lucida sans unicode,lucida grande,sans-serif;"><span style="font-size:14px;">Please follow are the steps described to generate an estimate -</span>&nbsp;</span></span></p>
+
+			<ul>
+				<li><span style="font-size:12px;"><span style="font-family: &quot;Lucida Sans Unicode&quot;, &quot;Lucida Grande&quot;, sans-serif;">Clone the Mule Migration Assistant source code and compile - (</span><a href="https://github.com/mulesoft/mule-migration-assistant#build-and-run" style="font-family: &quot;Lucida Sans Unicode&quot;, &quot;Lucida Grande&quot;, sans-serif; font-size: 13px;">More Details)</a><br />
+				<span style="font-family:lucida sans unicode,lucida grande,sans-serif;"><code>git clone git@github.com:mulesoft/mule-migration-assistant.git<br />
+				cd mule-migration-assistant/<br />
+				mvn clean package</code><br /></span>
+				<span style="font-family: &quot;Lucida Sans Unicode&quot;, &quot;Lucida Grande&quot;, sans-serif;">The MMA JAR (<code>mule-migration-assistant-runner-*CURRENT VERSION*.jar</code>) will be created under <code>runner/target</code> directory. This path will be need to be included as one of the parameters in the script below.</span></li>
+			</ul>
+
+			<ul>
+				<li><span style="font-size:12px;"><span style="font-family: &quot;Lucida Sans Unicode&quot;, &quot;Lucida Grande&quot;, sans-serif;">Clone the latest version of all the Mule 3 Projects from the Source Code Repository and store under a single directory</span></span><br />
+				&nbsp;</li>
+				<li><span style="font-size:12px;"><span style="font-family: &quot;Lucida Sans Unicode&quot;, &quot;Lucida Grande&quot;, sans-serif;">Download the script to run the MMA against all the Mule 3 Projects stored under the single directory. This will create a zip file containing all the JSON MMA reports for the Mule 3 Projects.</span></span>
+				<ul>
+					<li><span style="font-size:12px;"><span style="font-family: &quot;Lucida Sans Unicode&quot;, &quot;Lucida Grande&quot;, sans-serif;">​</span><a href="ui/runMMA.sh" style="font-family: &quot;Lucida Sans Unicode&quot;, &quot;Lucida Grande&quot;, sans-serif; font-size: 13px;">Bash Script</a></span><br />
+					<span style="font-size:12px;"><span style="font-family:lucida sans unicode,lucida grande,sans-serif;"><code><span class="s1" style="font-variant-ligatures: no-common-ligatures;"><span class="s1" style="font-variant-ligatures: no-common-ligatures;">Usage: ./runMMA.sh -m &lt;MMA Path&gt; -p &lt;Mule 3 Projects Path&gt; [-d &lt;Mule 3 Domain Projects Path&gt;] [-o &lt;Mule 4 Output Projects Path&gt;] [-v &lt;Mule 4 version&gt;]<br /></span>
+					<span style="font-variant-ligatures: no-common-ligatures;">-m: (Required) Full path of the Mule Migration Assistant (MMA) compiled jar with version<br />
+					<span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;">-p: (Required) Full path of the directory where all Mule 3 projects are located<br />
+					<span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;">-d: (Optional) Full path of the Mule 3 Domain Project. This is an optional parameter but it MUST be passed if the Mule 3 projects uses a domain or else the MMA will fail to migrate the application<br />
+					<span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;">-o: (Optional) Full path of the directory where all Mule 4 projects will be created by the MMA. If not provided, the script will create a temporary output folder and cleanup any Mule 4 Projects after the script completes processing<br />
+					<span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;">-v: (Optional) Mule Runtime Semantic version eg: 4.4.0 to which the project will be migrated. Default is 4.4.0</span></span></span></span></span></span></span></span></span></code></span></span></li>
+					<li><span style="font-size:12px;"><span style="font-family: &quot;Lucida Sans Unicode&quot;, &quot;Lucida Grande&quot;, sans-serif;">​</span><a href="ui/runMMA.bat" style="font-family: &quot;Lucida Sans Unicode&quot;, &quot;Lucida Grande&quot;, sans-serif; font-size: 13px;">Windows Script</a></span><br />
+					<span style="font-size:12px;"><span style="font-family:lucida sans unicode,lucida grande,sans-serif;"><code><span class="s1" style="font-variant-ligatures: no-common-ligatures;"><span class="s1" style="font-variant-ligatures: no-common-ligatures;">Usage: runMMA.bat -m "MMA Path" -p "Mule 3 Projects Path" [-d "Mule 3 Domain Projects Path"] [-o "Mule 4 Output Projects Path"] [-v "Mule 4 version"]<br /></span>
+					<span style="font-variant-ligatures: no-common-ligatures;">-m: (Required) Full path of the Mule Migration Assistant (MMA) compiled jar with version<br />
+					<span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;">-p: (Required) Full path of the directory where all Mule 3 projects are located<br />
+					<span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;">-d: (Optional) Full path of the Mule 3 Domain Project. This is an optional parameter but it MUST be passed if the Mule 3 projects uses a domain or else the MMA will fail to migrate the application<br />
+					<span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;">-o: (Optional) Full path of the directory where all Mule 4 projects will be created by the MMA. If not provided, the script will create a temporary output folder and cleanup any Mule 4 Projects after the script completes processing<br />
+					<span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;"><span style="font-variant-ligatures: no-common-ligatures;">-v: (Optional) Mule Runtime Semantic version eg: 4.4.0 to which the project will be migrated. Default is 4.4.0</span></span></span></span></span></span></span></span></span></code></span></span></li>
+				</ul>
+				<br />
+				</li>
+				<li><span style="font-size:12px;"><span style="font-family: &quot;Lucida Sans Unicode&quot;, &quot;Lucida Grande&quot;, sans-serif;">Upload the zip file and click on &#39;Generate Estimate&quot; button to download an Excel spreadsheet containing the details of the estimate</span></span></li>
+			</ul>
+			</td>
+			<td style="text-align: left; vertical-align: top;">
+			<ul class="form-style-1">
+				<li><label><span style="font-family:lucida sans unicode,lucida grande,sans-serif;">Compressed MMA JSON Report (e.g: report-*.zip)&nbsp;<span class="required">*</span></span></label><span style="font-family:lucida sans unicode,lucida grande,sans-serif;"><input accept=".zip" class="button" id="file1" name="file1" type="file" /></span></li>
+				<li><button class="button" form="form" type="submit" value="Generate Estimate">Generate Estimate</button></li>
+			</ul>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</form>
+</div>
+</body>
+</html>

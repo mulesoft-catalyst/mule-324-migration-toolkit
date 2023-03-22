@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+    <munit:config name="migration-apikit-test.xml" />
+	<secure-properties:config name="Secure_Properties_Config1" doc:name="Secure Properties Config" doc:id="e722a084-fb8d-4075-8da1-b56d88d8e508" file="properties/sandbox-catalyst-secure.yaml" key="${secure.key}" />
+	<configuration-properties doc:name="Configuration properties" doc:id="e67a3ebe-4c2b-4771-b33d-440db43a11f6" file="properties/sandbox-catalyst-properties.yaml" />
+	
+	<munit:test name="post:\mma-report\calculate-effort\compressed:multipart\form-data:migration-config-200-application\xlsx-FlowTest" description="Verifying functionality of [post:\mma-report\compressed:multipart\form-data:migration-config-200-application\xlsx]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="post:\mma-report\calculate-effort\compressed:multipart\form-data:migration-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <set-payload value="#[MunitTools::getResourceAsByteArray('scaffolder/request/results-20220413133502.zip')]" />
+			<ee:transform doc:name="Transform Message" doc:id="273e9b27-f922-4ca0-b4a2-c0e9b7246157" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output multipart/form-data
+boundary='34b21'
+---
+{
+  parts : {  
+    file1 : {
+      headers : {
+        "Content-Disposition" : {
+            "filename": "results-20220413133502.zip"
+        },
+        "Content-Type" : 'applicaton/zip'
+      },
+      content : payload
+    }
+  }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<http:request method="POST" path="/mma-report/calculate-effort/compressed" config-ref="HTTP_Request_Configuration">
+                <http:headers><![CDATA[#[{"Content-Type":"multipart/form-data"}]]]></http:headers>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::equalTo(read(MunitTools::getResourceAsByteArray('scaffolder/response/results-20220413133502_estimate.xlsx'), 'application/xlsx'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+    </munit:test>
+    <http:request-config name="HTTP_Request_Configuration" basePath="/api">
+        <http:request-connection host="localhost" port="${https.port}" protocol="HTTPS">
+			<tls:context>
+				<tls:trust-store insecure="true" />
+				<tls:key-store path="${key.path}" alias="${key.alias}" keyPassword="${secure::key.password}" password="${secure::key.password}" type="jks" />
+			</tls:context>
+		</http:request-connection>
+    </http:request-config>
+	<munit:test name="post:\mma-report\calculate-effort:application\json:migration-config-200-application\json-FlowTest" description="Verifying functionality of [post:\mma-report:application\json:migration-config-200-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="migration-post-mma-report-calculate-effort" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <set-payload value="#[MunitTools::getResourceAsString('scaffolder/request/post_mma-report_application_json.json')]" />
+			<http:request method="POST" path="/mma-report/calculate-effort" config-ref="HTTP_Request_Configuration">
+                <http:headers><![CDATA[#[{"Content-Type":"application/json"}]]]></http:headers>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+			<munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::equalTo(read(MunitTools::getResourceAsString('scaffolder/response/post_200_mma-report_application_json.json'), 'application/json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+        </munit:test>
+	<munit:test name="upload-compressed-409" doc:id="82bb0e55-497f-42d6-ab82-f3ba4fea60e6" expectedErrorType="MULE:UNKNOWN">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="migration-post-mma-report-upload-compressed" />
+			<munit:enable-flow-source value="post:\mma-report\upload-compressed:multipart\form-data:migration-config" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="4d64bbaf-f850-4ad5-be37-92017f415188" processor="os:retrieve" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="a99a8dd4-540a-4161-be94-65488d25a6e7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('scaffolder/request/post_mma-report-upload-compressed_application_json.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<set-payload value="#[MunitTools::getResourceAsByteArray('scaffolder/request/results-20220413133502.zip')]" doc:name="Set Payload" doc:id="f179c5b3-eca9-4240-87c0-f7553739219d" />
+			<ee:transform doc:name="Transform Message" doc:id="c73ba960-cb4e-42e4-8dd4-bd7a12580edc">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output multipart/form-data
+boundary='34b21'
+---
+{
+  parts : {  
+    file1 : {
+      headers : {
+        "Content-Disposition" : {
+            "filename": "results-20220413133502.zip"
+        },
+        "Content-Type" : 'applicaton/zip'
+      },
+      content : payload
+    }
+  }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<http:request method="POST" doc:name="Request" doc:id="289efd67-5bab-4aa8-87e5-634697a4bcd8" path="/mma-report/upload-compressed" config-ref="HTTP_Request_Configuration"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert That Status Code is 409" doc:id="54d08ee5-4297-4b08-b089-abbc4ffe94f1" message="The HTTP Status code is not correct!" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(409)]" />
+			<munit-tools:assert-that doc:name="Assert that" doc:id="8445e58e-b016-47d0-8748-bae09bf350f1" expression="#[payload]" is="#[MunitTools::equalTo(read(MunitTools::getResourceAsString('spost_409_mma-report-compressed_application_json.json'), 'application/json'))]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="retrieve-compressed-200" doc:id="7aef2657-a188-44bc-9a7d-2cb5b02b5290" >
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="migration-get-mma-report-retrieve-compressed" />
+			<munit:enable-flow-source value="get:\mma-report\retrieve-compressed:migration-config" />
+			<munit:enable-flow-source value="migration-get-mma-report-retrieve-compressed-filename" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="7c8e5bac-a5a1-4966-9631-1285cc913344" processor="os:retrieve">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d71cc153-2931-47f1-9578-25b8616e876d" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[read(MunitTools::getResourceAsString('scaffolder/request/post_mma-report-retrieve-compressed_application.json'), 'application/json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<http:request method="GET" doc:name="Request" doc:id="c96f6e4c-7b45-44f2-8fc1-b7ea1100530a" path="/mma-report/retrieve-compressed" config-ref="HTTP_Request_Configuration">
+				<http:query-params ><![CDATA[#[output application/java
+---
+{
+	fileName : "results-20220413133502.zip"
+}]]]></http:query-params>
+			</http:request>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that Status Code is 200" doc:id="7f36465d-a34d-4d74-b6f8-87266cbe13b4" is="#[MunitTools::equalTo(200)]" expression="#[attributes.statusCode]"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="697fd354-ebdb-43af-bcc2-aab6bdcb3923" is="#[%dw 2.0&#10;output multipart/form-data&#10;---&#10;&#10;MunitTools::equalTo(read(MunitTools::getResourceAsString('scaffolder/response/get_200_mma-report-retrieve-compressed_multipart_formdata.txt'), 'multipart/form-data', {boundary: &quot;34b21&quot;}))]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="retrieve-compressed-404" doc:id="93f39890-15dc-4a2b-a759-96c7c984301d" expectedErrorType="HTTP:NOT_FOUND">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="get:\mma-report\retrieve-compressed:migration-config" />
+			<munit:enable-flow-source value="migration-get-mma-report-retrieve-compressed" />
+			<munit:enable-flow-source value="migration-get-mma-report-retrieve-compressed-filename" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="872f26a7-453c-41ff-90e3-6326f1802b0a" processor="os:retrieve" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d71cc153-2931-47f1-9578-25b8616e876d" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="MULE:UNKNOWN" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<http:request method="GET" doc:name="Request" doc:id="9b34cb54-0ef1-4598-b33f-86b74736955b" path="/mma-report/retrieve-compressed" config-ref="HTTP_Request_Configuration">
+				<http:query-params ><![CDATA[#[output application/java
+---
+{
+	fileName : "results-20220413133502.zip"
+}]]]></http:query-params>
+			</http:request>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that Status Code is 404" doc:id="2ace263f-a558-4152-8d1b-4425d9508bbd" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" />
+			<munit-tools:assert-that doc:name="Assert that" doc:id="9030aaab-30a1-451d-be4b-d0ae71ab45b7" is="#[MunitTools::equalTo(read(MunitTools::getResourceAsString('scaffolder/response/get_404_mma-report_retrieve_compressed.json'), 'application/json'))]" expression="#[payload]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post:\mma-report\upload-compressed:multipart\form-data:migration-config-application\xlsx-FlowTest" description="Verifying functionality of [post:\mma-report\upload-compressed:multipart\form-data:migration-config-200-application\xlsx]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="migration-post-mma-report-upload-compressed" />
+			<munit:enable-flow-source value="post:\mma-report\upload-compressed:multipart\form-data:migration-config" />
+        </munit:enable-flow-sources>
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="fb232b72-0784-4379-8ce0-771c7f169e72" processor="os:retrieve">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="a99a8dd4-540a-4161-be94-65488d25a6e7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="any" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<set-payload value="#[MunitTools::getResourceAsByteArray('scaffolder/request/results-20220413133502.zip')]" />
+			<ee:transform doc:name="Transform Message" doc:id="e06d894e-d506-4407-ae87-3a97ac1dc7ab">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output multipart/form-data
+boundary='34b21'
+---
+{
+  parts : {  
+    file1 : {
+      headers : {
+        "Content-Disposition" : {
+            "filename": "results-20220413133502.zip"
+        },
+        "Content-Type" : 'applicaton/zip'
+      },
+      content : payload
+    }
+  }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<http:request method="POST" doc:name="Request" doc:id="c428983a-eb04-434a-b1d2-4056e83a5da5" path="/mma-report/upload-compressed" config-ref="HTTP_Request_Configuration">
+			</http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+			<munit-tools:assert-that doc:name="Assert that" doc:id="9f88db11-2b65-4b23-a680-5189fa1d9b6e" expression="#[payload]" is="#[MunitTools::equalTo(read(MunitTools::getResourceAsString('scaffolder/response/post_200_mma-report-upload-compressed_application_json.json'), 'application/json'))]"/>
+        </munit:validation>
+    </munit:test> 
+    <munit:test name="get:\mma-report\retrieve-compressed:migration-config-application\xlsx-FlowTest" description="Verifying functionality of [post:\mma-report\retrieve-compressed\{uploadId}:multipart\form-data:migration-config-200-application\xlsx]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="migration-get-mma-report-retrieve-compressed-(uploadId)" />
+			<munit:enable-flow-source value="get:\mma-report\retrieve-compressed\(uploadId):migration-config" />
+			<munit:enable-flow-source value="migration-get-mma-report-retrieve-compressed" />
+        </munit:enable-flow-sources>
+		<munit:behavior>
+			<os:store doc:name="Store" doc:id="0c29ee75-0ce8-4a3b-ad17-8deeecded44c" key="9338b2dc923cbce2fc8156f14f901a46" objectStore="migration-object-store-uploads">
+				<os:value><![CDATA[#[{
+  "timestamp": "2022-05-27T13:41:30.683+01:00",
+  "fileName": "test.txt",
+  "contentType": "text/plain",
+  "content": ""
+}]]]></os:value>
+			</os:store>
+		</munit:behavior>
+		<munit:execution>
+			<http:request method="GET" path="/mma-report/retrieve-compressed/9338b2dc923cbce2fc8156f14f901a46" config-ref="HTTP_Request_Configuration">
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+			<logger level="INFO" doc:name="Logger" doc:id="2137ee0e-5067-4d4e-869e-7e7c7869a7a0" message="#[payload]"/>
+			<munit-tools:assert-that expression="#[payload]" is="#[%dw 2.0&#10;output multipart/form-data&#10;---&#10;&#10;MunitTools::equalTo(read(MunitTools::getResourceAsString('scaffolder/response/get_200_mma-report-retrieve-compressed_multipart_formdata.txt'), 'multipart/form-data', {boundary: &quot;34b21&quot;}))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+    </munit:test>       
+    <munit:test name="post:\mma-report\calculate-effort:application\json:migration-config-400-application\json-FlowTest_BAD_REQUEST" description="Verifying functionality for BAD_REQUEST">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="post:\mma-report\calculate-effort:application\json:migration-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <set-payload value="{}" />
+			<http:request method="POST" path="/mma-report/calculate-effort" config-ref="HTTP_Request_Configuration">
+                <http:headers><![CDATA[#[{"Content-Type":"application/json"}]]]></http:headers>
+				<http:response-validator >
+					<http:success-status-code-validator values="400" />
+				</http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+			<munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(400)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 400" />
+            <logger level="INFO" doc:name="Logger" doc:id="d9bd1619-c2f2-43d3-b820-80872ba7f025" message="#[payload]"/>
+			<munit-tools:assert-that expression="#[payload]" is="#[%dw 2.0&#10;import * from dw::util::Values&#10;output application/json&#10;---&#10;&#10;MunitTools::equalTo((read(MunitTools::getResourceAsString('scaffolder/response/post_400_mma-report_application_json.json'), 'application/json') update &quot;timestamp&quot; with payload.timestamp ))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+        </munit:test>
+    <munit:test name="post:\mma-report\calculate-effort:application\json:migration-config-404-application\json-FlowTest_NOT_FOUND" description="Verifying functionality for NOT_FOUND">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="post:\mma-report\calculate-effort:application\json:migration-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <set-payload value="{}" />
+			<http:request method="POST" path="/mma-report1" config-ref="HTTP_Request_Configuration">
+				<http:response-validator >
+					<http:success-status-code-validator values="404" />
+				</http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+			<munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
+            <logger level="INFO" doc:name="Logger" doc:id="0055e479-9ff7-4516-bd92-9dccd9c26fef" message="#[payload]"/>
+			<munit-tools:assert-that expression="#[payload]" is="#[%dw 2.0&#10;import * from dw::util::Values&#10;output application/json&#10;---&#10;&#10;MunitTools::equalTo((read(MunitTools::getResourceAsString('scaffolder/response/post_404_mma-report_application_json.json'), 'application/json') update &quot;timestamp&quot; with payload.timestamp ))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+             </munit:validation>
+             </munit:test>
+    <munit:test name="post:\mma-report\calculate-effort:application\json:migration-config-405-application\json-FlowTest_METHOD_NOT_ALLOWED" description="Verifying functionality for METHOD_NOT_ALLOWED"> 
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="post:\mma-report\calculate-effort:application\json:migration-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <set-payload value="{}" />
+			<http:request method="GET" path="/mma-report/calculate-effort" config-ref="HTTP_Request_Configuration">
+                <http:headers><![CDATA[#[{"Content-Type":"application/json"}]]]></http:headers>
+				<http:response-validator >
+					<http:success-status-code-validator values="405" />
+				</http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+			<munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(405)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 405" />
+            <logger level="INFO" doc:name="Logger" doc:id="4fe5a9f1-7b3e-4a74-b8aa-3cf4f0d290b7" message="#[payload]"/>
+			<munit-tools:assert-that expression="#[payload]" is="#[%dw 2.0&#10;import * from dw::util::Values&#10;output application/json&#10;---&#10;&#10;MunitTools::equalTo((read(MunitTools::getResourceAsString('scaffolder/response/post_405_mma-report_application_json.json'), 'application/json') update &quot;timestamp&quot; with payload.timestamp ))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+        </munit:test>
+    <munit:test name="post:\mma-report\calculate-effort:application\json:migration-config-406-application\json-FlowTest_NOT_ACCEPTABLE" description="Verifying functionality for NOT_ACCEPTABLE">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="post:\mma-report\calculate-effort:application\json:migration-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <set-payload value="{}" />
+			<http:request method="POST" path="/mma-report/calculate-effort" config-ref="HTTP_Request_Configuration">
+                <http:headers><![CDATA[#[{"Accept":"application/xml","Content-Type":"application/json"}]]]></http:headers>
+				<http:response-validator >
+					<http:success-status-code-validator values="406" />
+				</http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+			<munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(406)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 406" />
+            <logger level="INFO" doc:name="Logger" doc:id="d7c2ea91-3970-4c50-bf32-d0ea0b7a18ed" message="#[payload]"/>
+			<munit-tools:assert-that expression="#[payload]" is="#[%dw 2.0&#10;import * from dw::util::Values&#10;output application/json&#10;---&#10;&#10;MunitTools::equalTo((read(MunitTools::getResourceAsString('scaffolder/response/post_406_mma-report_application_json.json'), 'application/json') update &quot;timestamp&quot; with payload.timestamp ))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+        </munit:test>
+    <munit:test name="post:\mma-report\calculate-effort:application\json:migration-config-415-application\json-FlowTest_UNSUPPORTED_MEDIA_TYPE" description="Verifying functionality for UNSUPPORTED_MEDIA_TYPE">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="post:\mma-report\calculate-effort:application\json:migration-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <set-payload value="{}" />
+			<http:request method="POST" path="/mma-report/calculate-effort" config-ref="HTTP_Request_Configuration">
+                <http:headers><![CDATA[#[{"Content-Type":"application/xml"}]]]></http:headers>
+				<http:response-validator >
+					<http:success-status-code-validator values="415" />
+				</http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+			<munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(415)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 415" />
+            <logger level="INFO" doc:name="Logger" doc:id="29926374-5a86-45de-b087-aec67544fef3" message="#[payload]"/>
+			<munit-tools:assert-that expression="#[payload]" is="#[%dw 2.0&#10;import * from dw::util::Values&#10;output application/json&#10;---&#10;&#10;MunitTools::equalTo((read(MunitTools::getResourceAsString('scaffolder/response/post_415_mma-report_application_json.json'), 'application/json') update &quot;timestamp&quot; with payload.timestamp ))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+        </munit:test>
+        <munit:test name="post:\mma-report\calculate-effort:application\json:migration-config-502-application\json-FlowTest" description="Verifying functionality of [post:\mma-report:application\json:migration-config-200-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="post:\mma-report\calculate-effort:application\json:migration-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="875d79dc-d9a8-4073-8f6d-6cfead1cbcb8" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="migration-post-mma-report-calculate-effort" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+        </munit:behavior>
+        <munit:execution>
+            <set-payload value="#[MunitTools::getResourceAsString('scaffolder/request/post_mma-report_application_json_502.json')]" />
+			<http:request method="POST" path="/mma-report/calculate-effort" config-ref="HTTP_Request_Configuration">
+                <http:headers><![CDATA[#[{"Content-Type":"application/json"}]]]></http:headers>
+				<http:response-validator >
+					<http:success-status-code-validator values="502" />
+				</http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(502)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 502" />
+            <logger level="INFO" doc:name="Logger" doc:id="5867b1de-62d9-4a12-88f5-91ccf64d6722" message="#[payload]"/>
+			<munit-tools:assert-that expression="#[payload]" is="#[%dw 2.0&#10;import * from dw::util::Values&#10;output application/json&#10;---&#10;&#10;MunitTools::equalTo((read(MunitTools::getResourceAsString('scaffolder/response/post_502_mma-report_application_json.json'), 'application/json') update &quot;timestamp&quot; with payload.timestamp ))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+        </munit:test>
+        <munit:test name="post:\mma-report\calculate-effort\compressed:multipart\form-data:migration-config-500-application\xlsx-FlowTest" description="Verifying functionality of [post:\mma-report\compressed:multipart\form-data:migration-config-200-application\xlsx]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="post:\mma-report\calculate-effort\compressed:multipart\form-data:migration-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+            <set-payload value="#[MunitTools::getResourceAsByteArray('scaffolder/request/results-xxx.zip')]" />
+			<ee:transform doc:name="Transform Message" doc:id="e2cdc803-386c-4334-bb6e-843f4ea5244b" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output multipart/form-data
+boundary='34b21'
+---
+{
+  parts : {  
+    file1 : {
+      headers : {
+        "Content-Disposition" : {
+            "filename": "results-20220413133502.zip"
+        },
+        "Content-Type" : 'applicaton/zip'
+      },
+      content : payload
+    }
+  }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<http:request method="POST" path="/mma-report/calculate-effort/compressed" config-ref="HTTP_Request_Configuration">
+                <http:headers><![CDATA[#[{"Content-Type":"multipart/form-data"}]]]></http:headers>
+				<http:response-validator >
+					<http:success-status-code-validator values="500" />
+				</http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(500)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 500" />
+            <logger level="INFO" doc:name="Logger" doc:id="93b0ed7d-6984-4088-a0b9-64ea2865d2c0" message="#[payload]"/>
+			<munit-tools:assert-that expression="#[payload]" is="#[%dw 2.0&#10;import * from dw::util::Values&#10;output application/json&#10;---&#10;&#10;MunitTools::equalTo((read(MunitTools::getResourceAsString('scaffolder/response/post_500_mma-report_application_json.json'), 'application/json') update &quot;timestamp&quot; with payload.timestamp ))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+    </munit:test>
+     <munit:test name="post:\mma-report\generate-checklist:application\json:migration-config-501-application\xlsx-FlowTest" description="Verifying functionality of [post:\mma-report\compressed:multipart\form-data:migration-config-200-application\xlsx]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="migration-main" />
+			<munit:enable-flow-source value="post:\mma-report\generate-checklist:application\json:migration-config" />
+        </munit:enable-flow-sources>
+        <munit:execution>
+			<set-payload value="#[MunitTools::getResourceAsString('scaffolder/request/post_mma-report-generate-checklist_application_json.json')]" />
+			<http:request method="POST" path="/mma-report/generate-checklist" config-ref="HTTP_Request_Configuration">
+				<http:headers ><![CDATA[#[{"Content-Type":"application/json"}]]]></http:headers>
+				<http:response-validator >
+					<http:success-status-code-validator values="501" />
+				</http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(501)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 501" />
+            <logger level="INFO" doc:name="Logger" doc:id="406d4cb4-afee-4554-ba1c-f9abcbe9e1c2" message="#[payload]"/>
+			<munit-tools:assert-that expression="#[payload]" is="#[%dw 2.0&#10;import * from dw::util::Values&#10;output application/json&#10;---&#10;&#10;MunitTools::equalTo((read(MunitTools::getResourceAsString('scaffolder/response/post_501_mma-report_application_json.json'), 'application/json') update &quot;timestamp&quot; with payload.timestamp ))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+    </munit:test>
+
+</mule>

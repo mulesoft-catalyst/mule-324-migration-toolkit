@@ -1,0 +1,19 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+  timestamp: 
+    type: datetime-only
+    example: "2022-04-04T21:00:00"
+  api:
+    type: string
+    example: "Migration"
+  code:
+    type: string
+    example: "400"
+  message: 
+    type: string
+    example: "BAD REQUEST"
+  details: 
+    type: string
+    example: "The server cannot or will not process the request due to something that is perceived to be a client error"
+  

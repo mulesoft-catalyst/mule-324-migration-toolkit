@@ -1,0 +1,10 @@
+[
+    {
+        "applicationName": "anypointplatform-utility-platformapi-orchestrator",
+        "complexity": "Low",
+        "score": 144,
+        "automation": "78.52",
+        "effortTShirt": "XS",
+        "summary": "The Mule 3 application contains 149 components out of which 117 were successfully migrated by MMA.Also, the MMA was able to convert 67/69 MEL expressions and 384/384 DW 1.0 expressions into DW 2.0.\n\nThe score is derived from an estimated manual effort required to migrate any remaining MEL/ DW expressions and the following Standard/ OOTB Mule components (and their number of occurrences in the application) which the MMA either failed to migrate or migrated them with warnings: \nhttp:response(2),\nhttp:error-response(2),\nforeach(5),\ncompatibility:attributes-to-inbound-properties(4),\ncompatibility:set-property(9),\ncompatibility:outbound-properties-to-var(4),\nwhen(1),\nset-payload(2),\nflow-ref(3)."
+    }
+]

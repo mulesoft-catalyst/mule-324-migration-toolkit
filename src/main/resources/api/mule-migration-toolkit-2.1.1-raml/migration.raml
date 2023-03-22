@@ -1,0 +1,108 @@
+#%RAML 1.0
+title: "Mule 3 Migration Estimator API "
+description: description to be added
+mediaType:
+  - application/json
+version: 2.1
+protocols:
+  - HTTP
+  - HTTPS
+baseUri: https://api.mulesoftemea-services.com/mule-migration-estimator/v1
+types:
+  mmaReportInputType: !include Types/mma-report-input-types.raml
+  mmaComplexityOutputType: !include Types/mmaComplexityOutputType.raml
+traits: 
+  commonErrorHandling: !include Traits/common-error-handling.raml
+securitySchemes:
+  basicAuthenticationSecurityScheme: !include security-scheme/basicAuthenticationSecurityScheme.raml
+/mma-report:
+  is:
+    - commonErrorHandling
+  securedBy:
+    - basicAuthenticationSecurityScheme
+  /calculate-effort:
+    post:
+      body:
+        application/json:
+          type: array
+          items:
+            type: mmaReportInputType
+          example: !include Examples/mma-report-input-example.json
+      responses: 
+        200: 
+          body:
+            type: array
+            items: 
+              type: mmaComplexityOutputType 
+            example: !include Examples/mma-report-output-example.json
+    /compressed: 
+      is:
+        - commonErrorHandling  
+      securedBy:
+        - basicAuthenticationSecurityScheme
+      post:
+        body:
+          multipart/form-data:
+        responses:
+          200:
+            body:
+              application/xlsx:   
+  /upload-compressed:
+    is:
+      - commonErrorHandling
+    securedBy:
+      - basicAuthenticationSecurityScheme
+    post: 
+      body:
+        multipart/form-data:
+      responses:
+        200:
+          body:
+            application/json:
+              type: object
+              properties:
+                uploadId:
+                  type: string
+                  example: "9338b2dc923cbce2fc8156f14f901a46"        
+  /retrieve-compressed:
+    description: Retrieve an upload from its filename as a query parameter
+    is:
+      - commonErrorHandling
+    securedBy:
+      - basicAuthenticationSecurityScheme
+    get:
+      queryParameters:
+        fileName:
+          type: string
+      responses:
+        200:
+          body:
+            multipart/form-data:
+    /{uploadId}:
+      description: To use an uploadId as an input that is retrieved from object store
+      is:
+        - commonErrorHandling
+      securedBy:
+        - basicAuthenticationSecurityScheme
+      get: 
+        responses:
+          200:
+            body:
+              multipart/form-data:
+    
+  /generate-checklist:
+    is:
+      - commonErrorHandling
+    securedBy:
+      - basicAuthenticationSecurityScheme
+    post:
+      body:
+        application/json:
+           type: mmaReportInputType
+
+    
+
+
+
+
+

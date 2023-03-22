@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	<munit:config name="migration-ui-test-suite.xml" />
+    <http:request-config name="HTTP_Request_configuration_ui" doc:name="HTTP Request configuration" doc:id="9253a0a6-d593-47ce-97ef-ab67e5327daf" >
+		<http:request-connection host="localhost" port="${https.port}" protocol="HTTPS">
+			<tls:context >
+				<tls:trust-store insecure="true" />
+				<tls:key-store path="${key.path}" alias="${key.alias}" keyPassword="${secure::key.password}" password="${secure::key.password}" />
+			</tls:context>
+		</http:request-connection>
+	</http:request-config>	
+	<munit:test name="migration-ui-test-suite-ui-flowTest" doc:id="39d013f5-2256-40c9-b2b9-9097e23b15a1" description="Test">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="ui-flow" />
+		</munit:enable-flow-sources>
+		<munit:execution>
+			<http:request method="GET" doc:name="Request" doc:id="4df7bd67-5a43-4bc9-ad21-f62220961d6c" config-ref="HTTP_Request_configuration_ui" path="/" >
+				<http:headers ><![CDATA[#[{"Accept":"application/json","Content-Type":"application/json"}]]]></http:headers>
+			</http:request>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert That Status Code is 200" doc:id="e3ab9c73-33a8-4456-a37b-a9346e5b7330" message="The HTTP Status code is not correct!" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="396a6140-0275-4b59-b55c-63950a91a597" message="The response payload is not correct!" expression="#[payload]" is="#[MunitTools::equalTo(MunitTools::getResourceAsByteArray('uitest/index.html'))]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="migration-ui-test-suite-ui-estimate-flowTest" doc:id="9e2a0bb3-6a40-48ee-997a-0e423b92ff02" description="Test">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="ui-estimate-flow" />
+		</munit:enable-flow-sources>
+		<munit:execution>
+			<http:request method="GET" doc:name="Request" doc:id="040f5fb4-b273-4ef1-a5e7-b318ea2a3586" config-ref="HTTP_Request_configuration_ui" path="/estimate.html" >
+				<http:headers ><![CDATA[#[{"Accept":"application/json","Content-Type":"application/json"}]]]></http:headers>
+			</http:request>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert That Status Code is 200" doc:id="250c000b-dfa4-4727-8d1d-4d485205b152" message="The HTTP Status code is not correct!" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="242fcaef-2bf4-4bba-a7f0-c96eba4fce7f" message="The response payload is not correct!" expression="#[payload]" is="#[MunitTools::equalTo(MunitTools::getResourceAsByteArray('uitest/estimate.html'))]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="migration-ui-test-suite-bash-script-flowTest" doc:id="20ab8b11-219f-433b-a1cc-54c77fcecf3c" description="Test">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="bash-script-flow" />
+		</munit:enable-flow-sources>
+		<munit:execution>
+			<http:request method="GET" doc:name="Request" doc:id="e40cb4ae-27e0-4223-aec5-250e9b3bf6ef" config-ref="HTTP_Request_configuration_ui" path="/ui/runMMA.sh" >
+				<http:headers ><![CDATA[#[{"Accept":"application/json","Content-Type":"application/json"}]]]></http:headers>
+			</http:request>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert That Status Code is 200" doc:id="5212c360-ea30-4713-befa-df4f4696b378" message="The HTTP Status code is not correct!" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="f5d24212-1fd0-411f-bb0d-f8c11f405572" message="The response payload is not correct!" expression="#[payload]" is="#[MunitTools::equalTo(MunitTools::getResourceAsByteArray('uitest/runMMA.sh'))]" />
+		</munit:validation>
+	</munit:test>
+		<munit:test name="migration-ui-test-suite-windows-script-flowTest" doc:id="1f8f2ec9-27ae-4475-b915-938c3298ce6e" description="Test">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="windows-script-flow" />
+		</munit:enable-flow-sources>
+		<munit:execution>
+			<http:request method="GET" doc:name="Request" doc:id="d26a8e9b-0595-4e02-b4a3-a83b935b0e4a" config-ref="HTTP_Request_configuration_ui" path="/ui/runMMA.bat" >
+				<http:headers ><![CDATA[#[{"Accept":"application/json","Content-Type":"application/json"}]]]></http:headers>
+			</http:request>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert That Status Code is 200" doc:id="65c79fe6-13c5-4c16-b001-ff6539d14b10" message="The HTTP Status code is not correct!" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" />
+			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="6c658485-d049-419d-b270-b4b1ea6bd916" message="The response payload is not correct!" expression="#[payload]" is="#[MunitTools::equalTo(MunitTools::getResourceAsByteArray('uitest/runMMA.bat'))]" />
+		</munit:validation>
+	</munit:test>
+
+</mule>

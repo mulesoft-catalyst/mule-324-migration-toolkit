@@ -1,0 +1,30 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+  applicationName:
+    type: string
+    example: mmaReport
+  complexity:
+    enum: ["Very Low", "Low", "Medium", "High", "Very High"]
+  effort:
+    type: number
+    format: int
+  effortTShirt:
+    type: string
+    enum: ["XS", "S", "M", "L", "XL"]
+  score:
+    type: number
+    format: double
+  automation: 
+    type: number
+    format: double
+  assuranceEffort:
+    type: number
+    format: int
+  summary: 
+    type: string
+  
+      
+
+
+      

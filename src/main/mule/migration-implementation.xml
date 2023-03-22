@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:compression="http://www.mulesoft.org/schema/mule/compression" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/compression http://www.mulesoft.org/schema/mule/compression/current/mule-compression.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+	<sub-flow name="migration-post-mma-report-calculate-effort" doc:id="cb23b71f-ea7a-4585-9e39-db878802d512" >
+		<logger level="INFO" doc:name="Logger" doc:id="f61af808-3ff4-4d63-b3c0-66f3abbd594f" message="Message Received"/>
+		<parallel-foreach doc:name="Parallel For Each" doc:id="7f630415-d09f-4120-bd9a-228edd061625" collection="#[payload]">
+			<ee:transform doc:name="Calculate effort" doc:id="6131304f-1ced-4a68-8ac8-e0936f201905">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+
+var numberOfMuleComponentsMigrated = payload.numberOfMuleComponentsMigrated - sizeOf(payload.detailedMessages filter $.level != "ERROR")
+var numberOfMuleComponents = payload.numberOfMuleComponents
+
+var score = (payload.numberOfMELExpressionLines - payload.numberOfMELExpressionLinesMigrated) * p('score.weightage.MEL') +
+			(payload.numberOfDWTransformationLines - payload.numberOfDWTransformationLinesMigrated) * p('score.weightage.DW') +
+			sum(payload.detailedMessages map (  p('score.weightage.level.' ++ $.level) * 
+											  (
+											    p('score.weightage.component.' ++ ($.component replace ":" with ".")) default p('score.weightage.component.default')
+											  ) *
+											  (
+											    p('score.weightage.key.' ++ $.key) default p('score.weightage.key.default')
+											  )
+											 )
+			    )											   
+var automation = if(numberOfMuleComponents > 0) ((numberOfMuleComponentsMigrated / numberOfMuleComponents) * 100) as String {format: "0.00"} else "N/A"
+
+
+var complexity = (read(p('complexity.weightage.array'), 'application/json') filter ($.componentMin <= payload.numberOfMuleComponents and $.componentMax >= payload.numberOfMuleComponents))[0]
+
+var totalScore = (score * (1 + complexity.unitTestEffort)) * complexity.contingencyFactor
+var effortTotalTShirt = (read(p('effort.score.array'), 'application/json') filter ($.scoreMin <= totalScore and $.scoreMax >= totalScore))[0].tShirtSize
+var detailedMessagesComponent = (payload.detailedMessages groupBy $.component) mapObject ( ($$ ++ "(" ++ sizeOf($) ++ ")") : p('score.weightage.component.' ++ ($$ replace ":" with ".")) )
+var detailedMessagesKey = (payload.detailedMessages groupBy ($.key default "default")) mapObject ( ("key - " ++ $$ ++ "(" ++ sizeOf($) ++ ")") : p('score.weightage.key.' ++ $$ ) )
+var summaryStandard = namesOf(detailedMessagesComponent mapObject (($$): $) if ($ != null)) joinBy ",
+"
+
+var customComponents = namesOf((detailedMessagesComponent ++ detailedMessagesKey) mapObject (($$): $) if ($ == null))
+var summaryCustom = customComponents joinBy ", 
+"
+var countCustom = sum(customComponents map splitBy(splitBy($, "(")[1], ")")[0])
+---
+{
+	"applicationName": payload.projectName,
+	"complexity": complexity.name,
+	"score": ceil(totalScore),
+	"automation": automation,
+	"effortTShirt": effortTotalTShirt,
+	"summary":  (if (numberOfMuleComponents > 0) (p('excel.estimate.summary.component') replace "<x>" with numberOfMuleComponents replace "<y>" with numberOfMuleComponentsMigrated) ++
+				 (p('excel.estimate.summary.expression') 
+				 	replace "<x>" with (payload.numberOfMELExpressionLinesMigrated ++ "/" ++ payload.numberOfMELExpressionLines)
+				 	replace "<y>" with (payload.numberOfDWTransformationLinesMigrated ++ "/" ++ payload.numberOfDWTransformationLines)				 	
+				 )
+				 else ""
+	) ++
+				(if (summaryStandard != "") ("
+
+" ++ p('excel.estimate.summary.standard') replace "<x>" with ("
+" ++ summaryStandard)) else "") ++
+				(if (summaryCustom != "") ("
+
+" ++ p('excel.estimate.summary.custom') replace "<x>" with countCustom replace "<y>" with ("
+" ++ summaryCustom)) else "")
+}
+     ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		</parallel-foreach>
+		<ee:transform doc:name="Concat" doc:id="15633a06-32d9-4047-bcb5-8d2e5801f89e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map $.payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log Payload" doc:id="aed293cd-b97b-4097-bb5d-4ab1a32d6d74" message="#[payload]"/>
+	</sub-flow>
+	<sub-flow name="migration-post-mma-report-calculate-effort-compressed" doc:id="49fb03d7-247e-4f75-a152-24e58d1d21a7" >
+		<logger level="INFO" doc:name="Logger" doc:id="ada06663-ed57-44db-9f41-ebfc8055a94e" message="Compressed Message Received"/>
+		<set-variable value="#[import remove from dw::core::Strings&#10;output application/java&#10;---&#10;(payload.parts[0].headers.'Content-Disposition'.filename remove &quot;.zip&quot;) ++ &quot;_estimate.xlsx&quot;]" doc:name="Filename" doc:id="d318571e-0bb3-4ce8-bf04-9264e99697bf" variableName="filename"/>
+		<compression:extract doc:name="Extract" doc:id="ab9dd8d9-9628-4f90-b157-ab9a52c21c41">
+			<compression:compressed ><![CDATA[#[payload.parts[0].content]]]></compression:compressed>
+			<compression:extractor>
+				<compression:zip-extractor />
+			</compression:extractor>
+		</compression:extract>
+		<ee:transform doc:name="Transform Message" doc:id="67dd48c3-6c8b-4ee4-8c89-3a08fb7afb7c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+valuesOf( payload filterObject ((value,key) -> key startsWith "report") ) map read($,"application/json")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="migration-post-mma-report-calculate-effort" doc:id="a5253d89-03d4-481e-ba05-8df8640a3db1" name="migration-post-mma-report-calculate-effort"/>
+		<java:invoke-static doc:name="Invoke static" doc:id="ab3cb751-9872-4120-8be9-dab61c10c5fa" class="org.mule.migration.GenerateMigrationEstimationExcel" method="populateMigrationEstimationTemplate(Object[],String)" outputMimeType="application/xlsx" outputEncoding="UTF-8">
+			<java:args ><![CDATA[#[%dw 2.0
+output application/java
+---
+{
+	"payload": payload,
+	"fileName": vars.fileName
+}]]]></java:args>
+		</java:invoke-static>
+		<set-variable value='#[output application/java&#10;---&#10;{&#10;	"Content-Type" : "application/xlsx",&#10;	"Content-Disposition": "attachment; filename=" ++ vars.filename&#10;}]' doc:name=" Content-Type &amp; Disposition" doc:id="b7f94bf0-2691-4af2-abdb-dede4606119a" variableName="outboundHeaders"/> 
+	</sub-flow>
+	<sub-flow name="migration-post-mma-report-upload-compressed" doc:id="9adbed3e-9fc7-47b2-b07d-21c871073e00" >
+		<logger level="INFO" doc:name="Logger" doc:id="73e69b22-c89a-48d7-ae27-1cf791046c53" message="message received - upload "/>
+		<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	&quot;timestamp&quot;: now(),&#10;	&quot;fileName&quot;: payload.parts[0].headers.'Content-Disposition'.filename,&#10;	&quot;contentType&quot;: payload.parts[0].headers.'Content-Type',&#10;	&quot;content&quot;: payload.parts[0].content&#10;}]" doc:name="uploadedFile" doc:id="399b332e-cff0-4365-8591-fcc67cd9622d" variableName="uploadedFile"/>
+		<set-variable value='#[import dw::Crypto&#10;output application/java&#10;---&#10;Crypto::MD5(vars.uploadedFile.fileName as Binary)]' doc:name="uploadId" doc:id="db807e8b-4667-430b-91b0-7945be488755" variableName="uploadId"/>
+		<try doc:name="Try" doc:id="6b4ae161-2043-4291-a755-3897928577ec">
+			<os:retrieve doc:name="Get last upload" doc:id="a99a8dd4-540a-4161-be94-65488d25a6e7" objectStore="migration-object-store-uploads" key="#[vars.uploadId]">
+		</os:retrieve>
+			<error-handler>
+				<on-error-continue enableNotifications="false" logException="false" doc:name="On Error Continue" doc:id="fce92637-f718-47e1-8c2f-bff4d568b99d">
+					<set-variable value="#[false]" doc:name="!recordExists" doc:id="e38f69fd-86e1-472f-9af4-a471fe61e3aa" variableName="recordExists" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<choice doc:name="is last upload &gt; 1w" doc:id="9fa173b2-5519-4a15-85c8-24452d14f77e" >
+			<when expression="#[!(vars.recordExists default true) or payload.timestamp + |P7D| &lt; vars.uploadedFile.timestamp]">
+				<os:store doc:name="Store" doc:id="44c8fc5a-bd8c-4dcd-99a8-10839c0bce14" key="#[vars.uploadId]" objectStore="migration-object-store-uploads">
+			<os:value><![CDATA[#[vars.uploadedFile]]]></os:value>
+		</os:store>
+				<ee:transform doc:name="uploadID" doc:id="4cd1c823-6397-41a0-b655-408d161ef463">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	uploadId: vars.uploadId
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<raise-error doc:name="Raise error" doc:id="52356686-5a4b-4e68-8591-82803bce1da1" type="MIGRATION_TOOLKIT:TOO_RECENT" description="This file was uploaded less than a week ago"/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="migration-get-mma-report-retrieve-compressed-(uploadId)" doc:id="d0ebeb0a-87c6-48c8-82a2-138b09f71d43" >
+		<ee:transform doc:name="uploadId" doc:id="f68410d1-8afd-4364-8750-d99d86a03687" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+message.attributes.uriParams."uploadId"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="6d02a8f4-ce88-4667-b3a3-144200e82576" name="migration-get-mma-report-retrieve-compressed"/>
+	</sub-flow>
+	<sub-flow name="migration-get-mma-report-retrieve-compressed" doc:id="07c15b88-38e8-4c85-be4c-dc4b6716cf36" >
+		<try doc:name="Try" doc:id="190c6c88-41de-4bb4-b198-ceab115b1223">
+			<os:retrieve doc:name="get upload via ID" doc:id="d71cc153-2931-47f1-9578-25b8616e876d" key="#[payload]" objectStore="migration-object-store-uploads" />
+			<error-handler>
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="82e0492f-120c-4476-97c3-213075e76cc9">
+					<raise-error doc:name="Raise error" doc:id="92138df3-2c56-4a0d-820d-7242df691158" type="MIGRATION_TOOLKIT:NOT_FOUND" description="the requested file doesn't exist" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<logger level="INFO" doc:name="Logger" doc:id="2c07e610-158b-4f74-ad11-cda2130821e6" message="#[payload]" />
+		<ee:transform doc:name="Transform Message" doc:id="596a7767-b446-4f78-9cfd-d85e36aea61c">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output multipart/form-data
+boundary='34b21'
+---
+{
+  parts : {  
+    file1 : {
+      headers : {
+        "Content-Disposition" : {
+            "filename": payload.fileName
+        },
+        "Content-Type" : payload.contentType
+      },
+      content : payload.content
+    }
+  }
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+	</sub-flow>
+	<sub-flow name="migration-get-mma-report-retrieve-compressed-filename" doc:id="d7988ca0-1cb9-40d6-9227-2fd1ef3a3b0a" >
+		<ee:transform doc:name="get md5 hash" doc:id="9cbbf5ca-7219-4474-936b-7b5508e23e5e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+import dw::Crypto
+output application/java
+---
+Crypto::MD5(attributes.queryParams.fileName as Binary)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="ffb799e1-3d7f-4cef-b474-c7a20f0eaefd" name="migration-get-mma-report-retrieve-compressed"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b25797ee-d395-47e5-97b6-b20b45a7324c" message="#[payload]" />
+	</sub-flow>
+</mule>

@@ -1,0 +1,7 @@
+{
+    "timestamp": "2022-06-07T16:43:37.242+02:00",
+    "api": "mule-324-migration-toolkit",
+    "code": "404",
+    "message": "NOT_FOUND",
+    "details": "the requested file doesn't exist"
+}
